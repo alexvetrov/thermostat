@@ -1,4 +1,5 @@
-#include <TroykaDHT.h>
+#include <SimpleDHT.h>
+//#include <TroykaDHT.h>
 #include <LiquidCrystal.h>
 
 int heater = 5;
@@ -16,9 +17,13 @@ int lastTemp = 0;
 int currentTemp = 0;
 int modeReset = 100;
 int i = 0;
+int j = 0;
+byte temperature = 0;
+byte humidity = 0;
 
 LiquidCrystal lcd(11,10,9,8,7,6);
-DHT dht(12,DHT11);
+//DHT dht(12,DHT11);
+SimpleDHT11 dht11(12);
 
 void setup()
 {
@@ -28,7 +33,7 @@ void setup()
   pinMode(btnMore, INPUT);
   //digitalWrite(heater, HIGH);
   lcd.begin(16,2);
-  dht.begin();
+  //dht.begin();
   Serial.begin(9600);
 }
 
@@ -48,25 +53,38 @@ void loop()
     updateDisplay();
   }
 
-  dht.read();
+//  dht.read();
+//
+//  switch(dht.getState()){
+//    case DHT_OK:
+//      currentTemp = dht.getTemperatureC();
+//    case DHT_ERROR_CHECKSUM:
+//      currentTemp = 999;
+//      Serial.println("DHT: Checksum error");
+//      break;
+//    case DHT_ERROR_TIMEOUT:
+//      currentTemp = 999;
+//      Serial.println("DHT: Timout error");
+//      break;
+//    case DHT_ERROR_NO_REPLY:
+//      currentTemp = 999;
+//      Serial.println("DHT: Sensor not connected");
+//      break;
+//  }
 
-  switch(dht.getState()){
-    case DHT_OK:
-      currentTemp = dht.getTemperatureC();
-    case DHT_ERROR_CHECKSUM:
-      currentTemp = 999;
-      Serial.println("DHT: Checksum error");
-      break;
-    case DHT_ERROR_TIMEOUT:
-      currentTemp = 999;
-      Serial.println("DHT: Timout error");
-      break;
-    case DHT_ERROR_NO_REPLY:
-      currentTemp = 999;
-      Serial.println("DHT: Sensor not connected");
-      break;
+  if (j < 15){
+    j = j+1;
+  }else{
+    int err = SimpleDHTErrSuccess;
+    if ((err = dht11.read(&temperature, &humidity, NULL)) != SimpleDHTErrSuccess) {
+      Serial.print("Read DHT11 failed, err="); Serial.print(SimpleDHTErrCode(err));
+      Serial.print(","); Serial.println(SimpleDHTErrDuration(err));
+      return;
+    }
+    j = 0;
   }
-      
+
+  currentTemp = temperature;
   int minTemp = setTemp - tempRange;
   
 //  if (currentTemp < minTemp && !heaterOn){
