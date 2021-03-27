@@ -8,16 +8,18 @@ int temp = 0;
 int btnLess = 2;
 int btnMode = 3;
 int btnMore = 4;
+int lcdBacklight = 13;
 int setTemp = 18;
 int tempRange = 5;
 int step = 1;
 int inputMode = 0;
 int tempSensorConst = 10;
 int lastTemp = 0;
-int currentTemp = 0;
+int currentTemp = 80;
 int modeReset = 100;
 int i = 0;
 int j = 0;
+int k = 0;
 byte temperature = 0;
 byte humidity = 0;
 
@@ -27,11 +29,11 @@ SimpleDHT11 dht11(12);
 
 void setup()
 {
-  //pinMode(heater, OUTPUT);
+  pinMode(heater, OUTPUT);
+  pinMode(lcdBacklight, OUTPUT);
   pinMode(btnLess, INPUT);
   pinMode(btnMode, INPUT);
   pinMode(btnMore, INPUT);
-  //digitalWrite(heater, HIGH);
   lcd.begin(16,2);
   //dht.begin();
   Serial.begin(9600);
@@ -87,15 +89,15 @@ void loop()
   currentTemp = temperature;
   int minTemp = setTemp - tempRange;
   
-//  if (currentTemp < minTemp && !heaterOn){
-//    digitalWrite(heater, LOW);
-//    heaterOn = true;
-//    //updateDisplay();
-//  }else if (currentTemp >= setTemp && heaterOn){
-//    digitalWrite(heater, HIGH);
-//    heaterOn = false;
-//    //updateDisplay();
-//  }
+  if (currentTemp < minTemp && !heaterOn){
+    digitalWrite(heater, HIGH);
+    heaterOn = true;
+    updateDisplay();
+  }else if (currentTemp >= setTemp && heaterOn){
+    digitalWrite(heater, LOW);
+    heaterOn = false;
+    updateDisplay();
+  }
   
   if (lastTemp != currentTemp){
     updateDisplay();
@@ -110,7 +112,14 @@ void loop()
     updateDisplay();
     i = 0;
   }
-    
+
+  
+  if (k < 50){
+    k = k+1;
+  }else{
+    digitalWrite(lcdBacklight, LOW);
+  }
+  
   delay(100);
 }
 
@@ -155,6 +164,7 @@ void changeMode(){
 
 void updateDisplay(){
   lcd.clear();
+  digitalWrite(lcdBacklight, HIGH);
   lcd.setCursor(0,0);
   if (heaterOn){
     lcd.print((String)"Temp: " + currentTemp + " HEATING");
@@ -167,4 +177,5 @@ void updateDisplay(){
   }else if (inputMode == 1){
     lcd.print((String)"Range: " + tempRange);
   }
+  k = 0;
 }
