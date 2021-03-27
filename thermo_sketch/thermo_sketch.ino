@@ -20,8 +20,8 @@ int modeReset = 100;
 int i = 0;
 int j = 0;
 int k = 0;
-byte temperature = 0;
-byte humidity = 0;
+byte temperature = 80;
+byte humidity = 50;
 
 LiquidCrystal lcd(11,10,9,8,7,6);
 //DHT dht(12,DHT11);
@@ -31,6 +31,7 @@ void setup()
 {
   pinMode(heater, OUTPUT);
   pinMode(lcdBacklight, OUTPUT);
+  digitalWrite(lcdBacklight, HIGH);
   pinMode(btnLess, INPUT);
   pinMode(btnMode, INPUT);
   pinMode(btnMore, INPUT);
@@ -45,14 +46,20 @@ void loop()
     decreaseSetting();
     printSetting();
     updateDisplay();
+    digitalWrite(lcdBacklight, HIGH);
+    k = 0;
   } else if (digitalRead(btnMode) == HIGH){
     changeMode();
     printSetting();
     updateDisplay();
+    digitalWrite(lcdBacklight, HIGH);
+    k = 0;
   } else if (digitalRead(btnMore) == HIGH){
     increaseSetting();
     printSetting();
     updateDisplay();
+    digitalWrite(lcdBacklight, HIGH);
+    k = 0;
   }
 
 //  dht.read();
@@ -114,7 +121,7 @@ void loop()
   }
 
   
-  if (k < 50){
+  if (k < 300){
     k = k+1;
   }else{
     digitalWrite(lcdBacklight, LOW);
@@ -164,7 +171,6 @@ void changeMode(){
 
 void updateDisplay(){
   lcd.clear();
-  digitalWrite(lcdBacklight, HIGH);
   lcd.setCursor(0,0);
   if (heaterOn){
     lcd.print((String)"Temp: " + currentTemp + " HEATING");
@@ -177,5 +183,4 @@ void updateDisplay(){
   }else if (inputMode == 1){
     lcd.print((String)"Range: " + tempRange);
   }
-  k = 0;
 }
